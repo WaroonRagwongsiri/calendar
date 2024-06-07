@@ -1,5 +1,6 @@
 import 'package:calendar/event/event_service.dart';
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 
 class SelectedDay extends StatefulWidget {
   final DateTime selectedDay;
@@ -12,6 +13,12 @@ class SelectedDay extends StatefulWidget {
 class _SelectedDayState extends State<SelectedDay> {
   final TextEditingController eventController = TextEditingController();
   late List<String> events = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
 
   void showAddEvent() {
     showDialog(
@@ -26,6 +33,7 @@ class _SelectedDayState extends State<SelectedDay> {
             actions: [
               TextButton(
                 onPressed: () {
+                  eventController.clear();
                   Navigator.of(context).pop();
                 },
                 child: const Text('Cancel'),
@@ -35,6 +43,7 @@ class _SelectedDayState extends State<SelectedDay> {
                   EventService().addEvent(
                       event: eventController.text,
                       dateTime: widget.selectedDay);
+                  eventController.clear();
                   Navigator.of(context).pop();
                   _loadEvents();
                 },
@@ -53,17 +62,16 @@ class _SelectedDayState extends State<SelectedDay> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadEvents();
+  void deleteEvent({required String event}) {
+    EventService().deleteEvent(dateTime: widget.selectedDay, event: event);
   }
 
   @override
   Widget build(BuildContext context) {
+    String formattedDate = DateFormat('d MMMM yyyy').format(widget.selectedDay);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.selectedDay.toString()),
+        title: Text(formattedDate),
       ),
       body: Column(
         children: [
@@ -77,6 +85,12 @@ class _SelectedDayState extends State<SelectedDay> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(events[index]),
+                    trailing: IconButton(
+                        onPressed: () {
+                          deleteEvent(event: events[index]);
+                          _loadEvents();
+                        },
+                        icon: const Icon(Icons.delete_outline)),
                   );
                 }),
           ),

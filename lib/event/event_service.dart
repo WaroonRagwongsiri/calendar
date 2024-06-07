@@ -20,13 +20,17 @@ class EventService {
     return events;
   }
 
-  Future<void> addEvent({required String event,required DateTime dateTime}) async {
+  Future<void> addEvent(
+      {required String event, required DateTime dateTime}) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> eventsJson = prefs.getStringList(_eventKey) ?? [];
 
     Event newEvent = Event(dateTime: dateTime, event: [event]);
 
-    eventsJson.add(jsonEncode({'dateTime': newEvent.dateTime.toIso8601String(), 'event': newEvent.event}));
+    eventsJson.add(jsonEncode({
+      'dateTime': newEvent.dateTime.toIso8601String(),
+      'event': newEvent.event
+    }));
 
     await prefs.setStringList(_eventKey, eventsJson);
   }
@@ -34,13 +38,13 @@ class EventService {
   Future<List<String>> getEventFromDate({required DateTime dateTime}) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> eventsJson = prefs.getStringList(_eventKey) ?? [];
-    
+
     List<String> eventsForDate = [];
 
     for (String eventString in eventsJson) {
       Map<String, dynamic> eventMap = jsonDecode(eventString);
       DateTime eventDateTime = DateTime.parse(eventMap['dateTime']);
-      
+
       if (eventDateTime.year == dateTime.year &&
           eventDateTime.month == dateTime.month &&
           eventDateTime.day == dateTime.day) {
@@ -50,5 +54,31 @@ class EventService {
     }
 
     return eventsForDate;
+  }
+
+  Future<void> deleteEvent(
+      {required DateTime dateTime, required String event}) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> eventsJson = prefs.getStringList(_eventKey) ?? [];
+
+    List<Event> events = eventsJson.map((eventString) {
+      Map<String, dynamic> eventMap = jsonDecode(eventString);
+      DateTime eventDateTime = DateTime.parse(eventMap['dateTime']);
+      List<String> eventList = List<String>.from(eventMap['event']);
+      return Event(dateTime: eventDateTime, event: eventList);
+    }).toList();
+
+    events.forEach((e) {
+      if (e.dateTime == dateTime && e.event.contains(event)) {
+        e.event.remove(event);
+      }
+    });
+
+    eventsJson = events
+        .map((e) => jsonEncode(
+            {'dateTime': e.dateTime.toIso8601String(), 'event': e.event}))
+        .toList();
+
+    await prefs.setStringList(_eventKey, eventsJson);
   }
 }
