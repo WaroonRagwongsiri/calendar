@@ -1,3 +1,4 @@
+import 'package:calendar/selected_day.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -22,7 +23,9 @@ class _CalendarState extends State<Calendar> {
               return [];
             },
             onDaySelected: (selectedDay, focusedDay) {
-              print("$selectedDay select");
+              Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                return SelectedDay(selectedDay: selectedDay);
+              }));
             },
           )
         ],
