@@ -1,7 +1,9 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:calendar/event/event.dart';
 import 'package:calendar/event/event_service.dart';
 import 'package:calendar/selected_day.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Calendar extends StatefulWidget {
@@ -16,8 +18,19 @@ class _CalendarState extends State<Calendar> {
 
   @override
   void initState() {
-    super.initState();
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
     _loadEvents();
+    
+    super.initState();
+  }
+
+  Future<void> resetSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   Future<void> _loadEvents() async {
@@ -44,7 +57,9 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(""),),
+      appBar: AppBar(
+        title: const Text(""),
+      ),
       body: Column(
         children: [
           TableCalendar(

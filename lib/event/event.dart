@@ -1,20 +1,23 @@
 class Event {
-  final DateTime dateTime;
-  final List<String> event;
+  DateTime dateTime;
+  List<String> event;
+  List<int> notificationIds;
 
-  Event({required this.dateTime, required this.event});
+  Event({required this.dateTime, required this.event, required this.notificationIds});
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'dateTime': dateTime.toIso8601String(),
-      'events': event,
+      'event': event,
+      'notificationIds': notificationIds,
     };
   }
 
-  factory Event.fromMap(Map<String, dynamic> map) {
+  factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      dateTime: DateTime.parse(map['dateTime']),
-      event: List<String>.from(map['events']),
+      dateTime: DateTime.parse(json['dateTime']),
+      event: List<String>.from(json['event']),
+      notificationIds: List<int>.from(json['notificationIds']),
     );
   }
 }
